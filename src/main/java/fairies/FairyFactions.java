@@ -24,10 +24,10 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = Version.MOD_ID, version = Version.VERSION)
+@Mod(modid = Version.MOD_ID, name = Version.MOD_NAME, version = Version.VERSION)
 public class FairyFactions {
 
-	@Instance
+	@Mod.Instance
 	public static FairyFactions		INSTANCE;
 
 	@SidedProxy(clientSide = Version.PROXY_CLIENT, serverSide = Version.PROXY_COMMON)
@@ -37,7 +37,7 @@ public class FairyFactions {
 
 	private Spawner					fairySpawner;
 
-	@EventHandler
+	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		final File BaseDir = new File(event.getModConfigurationDirectory(), Version.MOD_ID);
 		@SuppressWarnings("unused")
@@ -49,7 +49,7 @@ public class FairyFactions {
 		proxy.preInit();
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
 		FairyEventListener listener = new FairyEventListener();
 		MinecraftForge.EVENT_BUS.register(listener);
@@ -71,7 +71,7 @@ public class FairyFactions {
 		LOGGER.info("Loaded version %s", Version.VERSION);
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		fairySpawner = new Spawner();
 		// TODO: move these thresholds into config file

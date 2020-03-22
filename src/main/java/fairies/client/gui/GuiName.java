@@ -43,9 +43,9 @@ public class GuiName extends GuiScreen
 
         if (fairy != null)
         {
-    		FairyFactions.LOGGER.info("GuiName.onGuiClosed: isRemote = "+fairy.worldObj.isRemote);
+    		FairyFactions.LOGGER.info("GuiName.onGuiClosed: isRemote = "+fairy.world.isRemote);
 
-            if (fairy.worldObj.isRemote)
+            if (fairy.world.isRemote)
             {
                 //String s1 = "setfryname " + fairy.getEntityId() + " " + nameText;
                 FairyFactions.proxy.sendFairyRename(fairy, nameText);
@@ -103,8 +103,8 @@ public class GuiName extends GuiScreen
     public void drawScreen(int i, int j, float f)
     {
         drawDefaultBackground();
-        drawCenteredString(fontRendererObj, screenTitle, width / 2, 40, 0xffffff);
-        drawCenteredString(fontRendererObj, nameText, width / 2, 56, 0xffffff);
+        drawCenteredString(	fontRenderer, screenTitle, width / 2, 40, 0xffffff);
+        drawCenteredString(	fontRenderer, nameText, width / 2, 56, 0xffffff);
         super.drawScreen(i, j, f);
     }
 

@@ -18,8 +18,8 @@ public class ModelFairyEyes extends ModelBiped
 
     public ModelFairyEyes(final float f, final float f1)
     {
-        heldItemLeft = 0;
-        heldItemRight = 0;
+        leftArmPose = ArmPose.EMPTY;
+        rightArmPose = ArmPose.EMPTY;
         isSneak = false;
         flymode = false;
         bipedHead = new ModelRenderer(this, 40, 0);

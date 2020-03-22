@@ -40,9 +40,9 @@ public class FairyEventListener {
 	
 	@SubscribeEvent
 	public void onPacket(ServerCustomPacketEvent event) {
-		if( event.packet.channel().equals(Version.CHANNEL) ) {
-			final NetHandlerPlayServer handler = (NetHandlerPlayServer)event.handler;
-			handlePacket( event.packet, handler.playerEntity );
+		if( event.getPacket().channel().equals(Version.CHANNEL) ) {
+			final NetHandlerPlayServer handler = (NetHandlerPlayServer)event.getHandler();
+			handlePacket( event.getPacket(), handler.player );
 		}
 	}
 	
