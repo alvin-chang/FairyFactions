@@ -1,6 +1,6 @@
 package fairies;
 
-// import net.minecraftforge.fml.common.registry.LanguageRegistry;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * Constants for various message localizations as well as shortcut methods
@@ -72,11 +72,11 @@ public enum Loc {
   public String toString() { return get(); }
 
   public static String getLoc(String key) {
-    return "#" + key + "#";
-    // final String res = REG.getStringLocalization(key);
-/*     if (res.isEmpty())
+    final TextComponentTranslation textComponent = new TextComponentTranslation(key);
+    final String res = textComponent.getUnformattedComponentText();
+    if (res.isEmpty())
       return "#" + key + "#";
     else
-      return res; */
+      return res;
   }
 }
