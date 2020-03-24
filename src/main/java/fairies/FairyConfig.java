@@ -6,7 +6,7 @@ import net.minecraftforge.common.config.Configuration;
 
 public class FairyConfig extends Configuration {
 	
-    public static int		SPAWN_FACTION_MIN_SIZE	= 3;
+    public static int		SPAWN_FACTION_MIN_SIZE	= 8;
     public static int		SPAWN_FACTION_MAX_SIZE	= 10;
     
 	public static double	GENERAL_HEALTH_BASE		= 15.0D;
