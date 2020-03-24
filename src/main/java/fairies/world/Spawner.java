@@ -45,9 +45,9 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public final class Spawner {
-	private int maxAnimals = 140;
-	private int maxMobs = 160;
-	private int maxAquatic = 110;
+	private int maxAnimals = 40;
+	private int maxMobs = 60;
+	private int maxAquatic = 10;
 	public Biome standardBiomes[];
 	public List<String> biomeList;
 	@SuppressWarnings("rawtypes")
@@ -245,7 +245,6 @@ public final class Spawner {
 	// regular spawning with list
 	public final int doCustomSpawning(World worldObj, boolean spawnMobs, boolean spawnAnmls) {
 		if (!spawnMobs && !spawnAnmls) {
-			LOGGER.debug("not spawning");
 			return 0;
 		} else {
 			eligibleChunksForSpawning.clear();
@@ -264,7 +263,6 @@ public final class Spawner {
 					}
 				}
 			}
-			LOGGER.debug("doCustomSpawning");
 			countTotal = 0;
 			BlockPos chunkcoordspawn = worldObj.getSpawnPoint();
 			EnumCreatureType[] enumcreaturevalues = EnumCreatureType.values();
@@ -273,7 +271,6 @@ public final class Spawner {
 			for (int var37 = 0; var37 < var6; ++var37) {
 				EnumCreatureType enumcreaturetype = enumcreaturevalues[var37];
 				int enumC = countSpawnedEntities(worldObj, enumcreaturetype);
-				LOGGER.debug("There are " + enumC + " entities, max is " + getMax(enumcreaturetype));
 				if (true || (!enumcreaturetype.getPeacefulCreature() || spawnAnmls)
 						&& (enumcreaturetype.getPeacefulCreature() || spawnMobs) && (enumC < getMax(enumcreaturetype))) // *
 																														// eligibleChunksForSpawning.size()
@@ -355,7 +352,6 @@ public final class Spawner {
 
 											if (worldObj.getClosestPlayer((double) finalPosX, (double) finalPosY,
 													(double) finalPosZ, 24.0D, true) == null) {
-												LOGGER.debug("player is distant enough");
 												float distSpawnX = finalPosX - (float) chunkcoordspawn.getX();
 												float distSpawnY = finalPosY - (float) chunkcoordspawn.getY();
 												float distSpawnZ = finalPosZ - (float) chunkcoordspawn.getZ();
@@ -490,7 +486,6 @@ public final class Spawner {
 				}
 
 				if (!flag) {
-					LOGGER.debug("Adding New Custom Spawn Entity");
 					fulllist[x].add(new SpawnListEntry(class1, i, j, k));
 				}
 			} else {
