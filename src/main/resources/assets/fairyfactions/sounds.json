@@ -1,0 +1,62 @@
+{
+  "entity.fairy.death": {
+    "category": "entity",
+    "subtitle": "fairydeath",
+    "sounds": [
+      {
+        "name": "fairyfactions:fairy/fairydeath1",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairydeath2",
+        "stream": false
+      }
+    ]
+  },
+
+  "entity.fairy.hurt": {
+    "category": "entity",
+    "subtitle": "fairyhurt",
+    "sounds": [
+      {
+        "name": "fairyfactions:fairy/fairyhurt1",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairyhurt2",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairyhurt3",
+        "stream": false
+      }
+    ]
+  },
+
+  "entity.fairy.idle": {
+    "category": "entity",
+    "subtitle": "fairyidle",
+    "sounds": [
+      {
+        "name": "fairyfactions:fairy/fairyidle1",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairyidle2",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairyidle3",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairyidle4",
+        "stream": false
+      },
+      {
+        "name": "fairyfactions:fairy/fairyidle5",
+        "stream": false
+      }
+    ]
+  }
+}
