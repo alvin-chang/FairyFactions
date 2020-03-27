@@ -48,10 +48,10 @@ public class FairyAIFear extends EntityAIBase {
     this.theFairy.getNavigator().setPath(dest, this.speed);
   }
 
-/*   @Override
-  public boolean continueExecuting() {
+  @Override
+  public boolean shouldContinueExecuting() {
     return !this.theFairy.getNavigator().noPath();
-  } */
+  }
 
   /*
    * Original fear handler method from EntityFairy

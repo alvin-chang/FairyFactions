@@ -9,5 +9,4 @@ public class FairyAIPosted extends EntityAIBase {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }
