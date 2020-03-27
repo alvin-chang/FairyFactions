@@ -8,7 +8,6 @@ import fairies.event.FairyEventListener;
 import fairies.event.PacketSetFairyName;
 import java.util.List;
 import java.util.logging.Logger;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -23,11 +22,11 @@ import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
-
 
 public class CommonProxy {
 
@@ -52,21 +51,24 @@ public class CommonProxy {
 
   private void registerEntity(int entityID, Class<? extends Entity> entityClass,
                               String entityName) {
-                                
+
     EntityRegistry.registerModEntity(
         new ResourceLocation(Version.MOD_ID + ":" + entityName), entityClass,
         entityName, entityID, FairyFactions.INSTANCE, 64, 4, true);
   }
 
-  private void registerEntity(int entityID, Class<? extends EntityLiving> entityClass,
+  private void registerEntity(int entityID,
+                              Class<? extends EntityLiving> entityClass,
                               String entityName, int backgroundEggColor,
                               int foregroundEggColor) {
-   
+
     EntityRegistry.registerModEntity(
         new ResourceLocation(Version.MOD_ID + ":" + entityName), entityClass,
         entityName, entityID, FairyFactions.INSTANCE, 64, 4, true,
-		backgroundEggColor,foregroundEggColor);
-    //EntityRegistry.addSpawn(entityClass, 100, 3, 5, EnumCreatureType.CREATURE, Biomes.BIRCH_FOREST_HILLS, Biomes.BIRCH_FOREST, Biomes.PLAINS);
+        backgroundEggColor, foregroundEggColor);
+    // EntityRegistry.addSpawn(entityClass, 100, 3, 5,
+    // EnumCreatureType.CREATURE, Biomes.BIRCH_FOREST_HILLS,
+    // Biomes.BIRCH_FOREST, Biomes.PLAINS);
   }
 
   public void initGUI() {
@@ -85,23 +87,25 @@ public class CommonProxy {
 
   public void sendChat(EntityPlayerMP player, String s) {
     if (player != null && !s.isEmpty()) {
-/*       player.NetHandlerPlayServer.sendPacket(
-          new SPacketChat(new TextComponentString(s))); */
-	}
+      player.connection.sendPacket(new SPacketChat(new TextComponentString(s)));
+    }
   }
 
   public void sendToClient(FMLProxyPacket packet, EntityPlayerMP player) {
     eventChannel.sendTo(packet, player);
   }
+
   public void sendToServer(FMLProxyPacket packet) {
     eventChannel.sendToServer(packet);
   }
+
   public void sendToAllPlayers(Packet<?> packet) {
-  /*   List<EntityPlayerMP> players =
-        MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+    List<EntityPlayerMP> players = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers();
+/*
+    List<EntityPlayerMP> players = MinecraftServer.getEntityWorld().getPlayers(); */
     for (EntityPlayerMP player : players) {
-      player.playerNetServerHandler.sendPacket(packet);
-    } */
+      player.connection.sendPacket(packet);
+    } 
   }
 
   public void sendFairyRename(final EntityFairy fairy, final String name) {
@@ -123,7 +127,7 @@ public class CommonProxy {
     sendToAllPlayers(packet);
 
     if (!(rider instanceof FairyEntityFishHook)) {
-      //rider.mountEntity(newVehicle); addPassenger??
+      // rider.mountEntity(newVehicle); addPassenger??
     }
   }
 
@@ -139,14 +143,13 @@ public class CommonProxy {
   @Deprecated
   public void sendDisband(EntityPlayerMP player, String s) {
     sendChat(player, s);
-    /*
-if (player != null) {
-    final SPacketChat packet = new SPacketChat(new TextComponentString(s));
-player.playerNetServerHandler.sendPacket(packet);
-}
 
-//Shouldn't enable this by default, could be spammy.
-//MinecraftServer.logger.info(s);
-*/
+    if (player != null) {
+      final SPacketChat packet = new SPacketChat(new TextComponentString(s));
+      player.connection.sendPacket(packet);
+    }
+
+    // Shouldn't enable this by default, could be spammy.
+    // MinecraftServer.logger.info(s);
   }
 }
