@@ -51,16 +51,17 @@ public class FairyGroupGenerator {
 			final BlockPos pos = new BlockPos(x, y, z);
 			final IBlockState blockState = world.getBlockState(pos);
 			final Block block = blockState.getBlock();
-			LOGGER.debug("block is:");
+			String dbgStr = "block is:";
 			if (blockState == cordial) {
-				LOGGER.debug("cordial");
+				dbgStr += "cordial ";
 			}
 			if (isAirySpace(blockState, block)) {
-				LOGGER.debug("airy");
+				dbgStr += "airy";
 			}
 			if (isAirySpace(blockState, block)) {
 				list.add(new int[] { x, y + 1, z });
 			}
+			LOGGER.debug(dbgStr);
 		}
 
 		if (list.size() < minSize) {
