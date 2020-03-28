@@ -32,18 +32,20 @@ import net.minecraft.entity.ai.EntityAISit;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
-import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityFlying;
 import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityParrot;
+import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityTameable;
@@ -100,7 +102,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import scala.swing.TextComponent;
 
-public class EntityFairy extends EntityTameable implements EntityFlying {
+public class EntityFairy extends EntityFlappable implements EntityFlying {
 
   private boolean cower;
   public boolean didHearts;
@@ -166,7 +168,7 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
     // this.tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
     this.tasks.addTask(4, new EntityAIAttackMelee(this, 1.0D, true));
 
-    this.tasks.addTask(6, new FairyAIWanderAvoidWater(this, 1.0D));
+    this.tasks.addTask(6, new FairyAIWanderAvoidWater(this, 0.2D));
 
     this.tasks.addTask(7, new FairyAIHealing(this, 0.25D));
     // this.tasks.addTask(5, new EntityAIFollowOwner(this, 1.0D, 10.0F, 2.0F));
@@ -189,7 +191,7 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
     // this.targetTasks.addTask(2, new FairyAIFear(this, 2.0D));
     super.initEntityAI();
     // this.setNameEnabled(false);
-    this.setAIMoveSpeed(FairyConfig.GENERAL_SPEED_BASE);
+    // this.setAIMoveSpeed(FairyConfig.GENERAL_SPEED_BASE);
   }
 
   @Override
@@ -365,7 +367,6 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
     this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(FairyConfig.GENERAL_SPEED_BASE);
     // this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(4.0D);
     // this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(10.0D);
-    
   }
 
   @Override
@@ -373,12 +374,14 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
 
     if (getRidingEntity() != null) {
       if (this.world.isRemote) {
+        LOGGER.debug("Yword is remote");
         return super.getYOffset() - (flymode() ? 1.15F : 1.35f);
       }
-
+      LOGGER.debug("Yword is not remote");
       return super.getYOffset() + (flymode() ? 0.65F : 0.55F)
           - (getRidingEntity() instanceof EntityChicken ? 0.0F : 0.15F);
     } else {
+      LOGGER.debug("Yfallback");
       return this.getYOffset();
     }
   }
@@ -396,6 +399,32 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
       }
 
       setPosted(postY > -1);
+      /*
+       * if (flymode()) { if (!liftOff() && currentRidingEntity != null &&
+       * !currentRidingEntity.onGround && currentRidingEntity instanceof
+       * EntityLivingBase) { currentRidingEntity.fallDistance = 0F;
+       * 
+       * if (currentRidingEntity.motionY < FairyConfig.DEF_FLOAT_RATE) {
+       * currentRidingEntity.motionY = FairyConfig.DEF_FLOAT_RATE; }
+       * 
+       * final boolean isJumping =
+       * ReflectionHelper.getPrivateValue(EntityLivingBase.class, (EntityLivingBase)
+       * currentRidingEntity, MCP_ISJUMPING); if (isJumping &&
+       * currentRidingEntity.motionY < FairyConfig.DEF_FLAP_RATE && canFlap()) {
+       * currentRidingEntity.motionY = FairyConfig.DEF_FLAP_RATE; } } else { if
+       * (motionY < FairyConfig.DEF_FLOAT_RATE) { motionY =
+       * FairyConfig.DEF_FLOAT_RATE; }
+       * 
+       * if (canFlap() && checkGroundBelow() && motionY < 0D) { motionY =
+       * FairyConfig.DEF_FLOAT_RATE * FairyConfig.DEF_SOLO_FLAP_MULT; }
+       * 
+       * if (liftOff() && currentRidingEntity != null) {
+       * currentRidingEntity.fallDistance = 0F; motionY = currentRidingEntity.motionY
+       * = FairyConfig.DEF_FLAP_RATE * FairyConfig.DEF_LIFTOFF_MULT; } }
+       * 
+       * }
+       */
+    
     }
     ItemStack helditemitem = super.getHeldItemMainhand();
     if (tempItem != null) {
@@ -445,7 +474,44 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
   @Override
   public void onUpdate() {
     super.onUpdate();
+    int flyTime = getFlyTime();
+    // flyTime is reduced, normally one unit(tick?) at a time
+    int maxflyTime = 100;
+    // flyRecharge: multiplier
+    // 1 fairy has to walk for the same time that it can fly
+    // >1 it recharges faster
+    // <1 slower
 
+    int flyRecharge = 2;
+
+    if (flymode()) {
+      if (this.motionY < FairyConfig.DEF_FLOAT_RATE)
+      {
+          this.motionY = FairyConfig.DEF_FLOAT_RATE;
+      }
+
+      if (canFlap() && checkGroundBelow() && this.motionY < 0D)
+      {
+          this.motionY = 0.1875D;
+      }
+      if (flyTime > 0) {
+        flyTime--;
+      }
+
+      if (flyTime == 0) {
+        setFlymode(false);
+        setCanFlap(false);
+      }
+    } else {
+      if (flyTime < maxflyTime) {
+        flyTime = flyTime + flyRecharge;
+      }
+      if (flyTime == maxflyTime || (flyTime > 5 && rand.nextInt(50) == 0)) {
+        setFlymode(true);
+        jump();
+      }
+    }
+    setFlyTime(flyTime);
     final Entity currentRidingEntity = this.getRidingEntity();
     if (this.createGroup) {
       createGroup = !createFaction(posX, getEntityBoundingBox().minY, posZ);
@@ -475,36 +541,6 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
 
       if (sinage > Math.PI * 2F) {
         sinage -= Math.PI * 2F;
-      }
-
-      if (flymode()) {
-        if (!liftOff() && currentRidingEntity != null && !currentRidingEntity.onGround
-            && currentRidingEntity instanceof EntityLivingBase) {
-          currentRidingEntity.fallDistance = 0F;
-
-          if (currentRidingEntity.motionY < FairyConfig.DEF_FLOAT_RATE) {
-            currentRidingEntity.motionY = FairyConfig.DEF_FLOAT_RATE;
-          }
-
-          final boolean isJumping = ReflectionHelper.getPrivateValue(EntityLivingBase.class,
-              (EntityLivingBase) currentRidingEntity, MCP_ISJUMPING);
-          if (isJumping && currentRidingEntity.motionY < FairyConfig.DEF_FLAP_RATE && canFlap()) {
-            currentRidingEntity.motionY = FairyConfig.DEF_FLAP_RATE;
-          }
-        } else {
-          if (motionY < FairyConfig.DEF_FLOAT_RATE) {
-            motionY = FairyConfig.DEF_FLOAT_RATE;
-          }
-
-          if (canFlap() && checkGroundBelow() && motionY < 0D) {
-            motionY = FairyConfig.DEF_FLOAT_RATE * FairyConfig.DEF_SOLO_FLAP_MULT;
-          }
-
-          if (liftOff() && currentRidingEntity != null) {
-            currentRidingEntity.fallDistance = 0F;
-            motionY = currentRidingEntity.motionY = FairyConfig.DEF_FLAP_RATE * FairyConfig.DEF_LIFTOFF_MULT;
-          }
-        }
       }
 
       if (hearts() != didHearts) {
@@ -562,6 +598,15 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
       processSwinging();
     }
   } // end: onUpdate
+
+  @Override
+  public boolean isOnSameTeam(Entity entityIn) {
+    boolean result = super.isOnSameTeam(entityIn);
+    if (!result && getFaction() > 0) {
+      result = ((EntityFairy) entityIn).getFaction() == this.getFaction();
+    }
+    return result;
+  }
 
   @Override
   public boolean isEntityInsideOpaqueBlock() {
@@ -1178,21 +1223,21 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
   }
 
   public List<Entity> findLiveVisibleEntities() {
-    List<Entity> friendlies = Lists.<Entity>newArrayList();
-    List<?> list = world.getEntitiesWithinAABBExcludingEntity(this, getEntityBoundingBox().expand(16D, 16D, 16D));
+    List<Entity> result = Lists.<Entity>newArrayList();
+    List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(this, getEntityBoundingBox().expand(64D, 64D, 64D));
 
     for (int j = 0; j < list.size(); j++) {
       Entity entity = (Entity) list.get(j);
-      if (canEntityBeSeen(entity) && !entity.isDead) {
-        friendlies.add(entity);
+      if (!entity.isDead && canEntityBeSeen(entity)) {
+        result.add(entity);
       }
     }
-    return friendlies;
+    return result;
   }
 
   // This handles actions of the medics.
-  public List<Entity> findFriendlyEntities() {
-    List<Entity> friendlies = Lists.<Entity>newArrayList();
+  public List<EntityLivingBase> findFriendlyEntities() {
+    List<EntityLivingBase> friendlies = Lists.<EntityLivingBase>newArrayList();
     List<?> list = findLiveVisibleEntities();
 
     for (int j = 0; j < list.size(); j++) {
@@ -1213,6 +1258,22 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
     return friendlies;
   }
 
+  public List<EntityFairy> findFairies(Boolean wantSameTeam) {
+    List<EntityFairy> result = Lists.newArrayList();
+    List<?> list = findLiveVisibleEntities();
+
+    for (int j = 0; j < list.size(); j++) {
+      Entity entity = (Entity) list.get(j);
+      if (entity instanceof EntityFairy) {
+        EntityFairy fairy = (EntityFairy) list.get(j);
+        if (fairy.getHealth() > 0) {
+          result.add(fairy);
+        }
+      }
+    }
+    return result;
+  }
+
   public Entity getHealTarget() {
     return entityHeal;
   }
@@ -1225,8 +1286,8 @@ public class EntityFairy extends EntityTameable implements EntityFlying {
     entityHeal = null;
   }
 
-  public Entity getEntityToHeal() {
-    List<Entity> friendlies = this.findFriendlyEntities();
+  public Object getEntityToHeal() {
+    List<?> friendlies = this.findFriendlyEntities();
     if (friendlies.size() > 0) {
       return friendlies.get(0);
     }
