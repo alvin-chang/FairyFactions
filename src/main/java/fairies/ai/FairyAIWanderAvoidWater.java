@@ -39,6 +39,9 @@ public class FairyAIWanderAvoidWater extends EntityAIWanderAvoidWater {
 
       this.mustUpdate = false;
     }
+    if(this.entity.getHealTarget() != null) {
+    	return false;
+    }
     // if (this.entity.getRNG().nextInt(this.executionChance) != 0)
     if (this.entity.getRNG().nextInt(3) == 0) {
       return false;
@@ -46,7 +49,7 @@ public class FairyAIWanderAvoidWater extends EntityAIWanderAvoidWater {
     this.followEntity = null;
     Vec3d vec3d = this.getPosition();
 
-    List<EntityFairy> fairies = this.entity.findFairies(true);
+    List<EntityFairy> fairies = this.entity.findFairies(true, true);
     Collections.shuffle(fairies, this.entity.getRNG());
 
     for (int j = 0; j < fairies.size(); j++) {
@@ -86,6 +89,9 @@ public class FairyAIWanderAvoidWater extends EntityAIWanderAvoidWater {
   @Override
   public boolean shouldContinueExecuting()
   {
+	  if(this.entity.medic() && this.entity.getHealTarget() != null) {
+	    	return false;
+	    }
       return !this.entity.getNavigator().noPath();
   }
   /*
