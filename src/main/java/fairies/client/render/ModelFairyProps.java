@@ -12,8 +12,6 @@ public class ModelFairyProps extends ModelBiped {
   public ModelFairyProps(final float f) { this(f, 0.0F); }
 
   public ModelFairyProps(final float f, final float f1) {
-    leftArmPose = ArmPose.EMPTY;
-    rightArmPose = ArmPose.EMPTY;
     isSneak = false;
     flymode = false;
     jobType = 0;
@@ -459,20 +457,6 @@ public class ModelFairyProps extends ModelBiped {
       medicHead.rotationPointY = 12F;
     }
   }
-
-  /*
-   * NOTE: These are apparently removed in 1.8
-   *
-  @Override
-      public void renderEars(final float f)
-  {
-  }
-
-  @Override
-      public void renderCloak(final float f)
-  {
-  }
-   */
 
   public ModelRenderer scoutHead;
   public ModelRenderer scoutBody;
