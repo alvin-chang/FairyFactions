@@ -1640,7 +1640,7 @@ public class EntityFairy extends EntityFlappable implements EntityFlying {
 			final BlockPos postPos = new BlockPos(postX, postY, postZ);
 
 			// Check to see if the chunk is loaded.
-			Chunk chunk = world.getChunk(postPos);
+			Chunk chunk = world.getChunkFromBlockCoords(postPos);
 
 			if (chunk != null && !(chunk instanceof EmptyChunk)) {
 				Block block = world.getBlockState(postPos).getBlock();

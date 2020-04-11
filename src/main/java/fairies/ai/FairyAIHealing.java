@@ -30,17 +30,11 @@ public class FairyAIHealing extends FairyAIBase {
   @Override
   public boolean shouldExecute() {
     if (this.theFairy.medic() && this.theFairy.canHeal()) {
-      if (this.theFairy.getHealTarget() == null) {
-        this.theFairy.LOGGER.debug(this.theFairy.toString() + ": has no target");
-        if (this.theFairy.getHealth() < this.theFairy.getMaxHealth() * 0.66F) {
-          patient = this.theFairy;
-        } else {
-          patient = (EntityLivingBase) this.theFairy.getEntityToHeal();
-        }
+      if (this.theFairy.getHealTarget() == null) {  
+        patient = (EntityLivingBase) this.theFairy.getEntityToHeal();
         if (patient == null) {
           return false;
         }
-        this.theFairy.LOGGER.debug(this.theFairy.toString() + ": found target to heal");
         this.theFairy.setHealTarget(patient);
       }
       return true;
@@ -51,7 +45,7 @@ public class FairyAIHealing extends FairyAIBase {
   @Override
   public boolean shouldContinueExecuting() {
     if (patient != null) {
-      if (patient.getHealth() < patient.getMaxHealth() * 0.66F) {
+      if (patient.getHealth() == patient.getMaxHealth()) {
         this.theFairy.setHealTarget(null);
         patient = null;
         return false;

@@ -1,6 +1,5 @@
 package fairies.proxy;
 
-import fairies.FairyFactions;
 import fairies.Version;
 import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
@@ -8,20 +7,17 @@ import fairies.event.FairyEventListener;
 import fairies.event.PacketSetFairyName;
 import java.util.List;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketEntityAttach;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 public class CommonProxy {
 

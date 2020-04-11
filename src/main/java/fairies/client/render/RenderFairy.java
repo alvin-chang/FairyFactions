@@ -47,7 +47,7 @@ public class RenderFairy extends RenderLiving<EntityFairy> {
         this.addLayer(new LayerFairyRogue(this));
         this.addLayer(new LayerFairyProps(this));
         this.addLayer(new LayerFairyEyes(this));
-        this.addLayer(new LayerFairyWither(this));
+        //this.addLayer(new LayerFairyWither(this));
         fairyModel = modelfairy;
        // fairyModel5 = new ModelFairyProps2();
     }
