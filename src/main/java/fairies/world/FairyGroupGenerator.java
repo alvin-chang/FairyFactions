@@ -20,12 +20,13 @@ public class FairyGroupGenerator {
 	private final int maxSize;
 	private final int minSize;
 	private final int faction;
+	private EntityFairy queen;
 
 	private static final int RADIUS = 8;
 	private static final int HALFRAD = RADIUS / 2;
 	public static final Logger LOGGER = LogManager.getFormatterLogger(Version.MOD_ID);
 
-	public FairyGroupGenerator(int min, int max, final int faction) {
+	public FairyGroupGenerator(int min, int max, final EntityFairy queen) {
 		if (max < min) {
 			final int p = max;
 			max = min;
@@ -34,7 +35,8 @@ public class FairyGroupGenerator {
 
 		this.minSize = min;
 		this.maxSize = max;
-		this.faction = faction;
+		this.queen = queen;
+		this.faction = queen.getFaction();
 	}
 
 	public boolean generate(final World world, final Random rand, final int i, final int j, final int k) {
@@ -54,9 +56,6 @@ public class FairyGroupGenerator {
 			String dbgStr = "block is:";
 			if (blockState == cordial) {
 				dbgStr += "cordial ";
-			}
-			if (isAirySpace(blockState, block)) {
-				dbgStr += "airy";
 			}
 			if (isAirySpace(blockState, block)) {
 				list.add(new int[] { x, y + 1, z });
@@ -86,6 +85,8 @@ public class FairyGroupGenerator {
 			final double c = z + 0.45D + (rand.nextFloat() * 0.1D);
 			final EntityFairy fairy = new EntityFairy(world);
 			fairy.setPosition(a, b, c);
+			fairy.setRulerId(this.queen.getUniqueID());
+			this.queen.registerFactionMember(fairy);
 			fairy.setFaction(faction);
 
 			if (guards > 0) {
