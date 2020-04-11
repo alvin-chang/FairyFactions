@@ -44,60 +44,60 @@ public class FairyModelRenderer extends ModelRenderer {
     addBox(offX, offY, offZ, width, height, depth, 0.0F, 0, 0.0F);
   }
 
-  public void addBox(float f, float f1, float f2, final int i, final int j,
-                     final int k, final float f3, final int carl, float sagan) {
-    field_35977_i = f;
-    field_35975_j = f1;
-    field_35976_k = f2;
-    field_35973_l = f + i;
-    field_35974_m = f1 + j;
-    field_35972_n = f2 + k;
+  public void addBox(float offX, float offY, float offZ, final int width, final int height,
+                     final int depth, final float f3, final int carl, float sagan) {
+    field_35977_i = offX;
+    field_35975_j = offY;
+    field_35976_k = offZ;
+    field_35973_l = offX + width;
+    field_35974_m = offY + height;
+    field_35972_n = offZ + depth;
     field_35978_r = new PositionTextureVertex[8];
     faces = new TexturedQuad[6];
-    float f4 = f + i;
-    float f5 = f1 + j;
-    float f6 = f2 + k;
-    f -= f3;
-    f1 -= f3;
-    f2 -= f3;
+    float f4 = offX + width;
+    float f5 = offY + height;
+    float f6 = offZ + depth;
+    offX -= f3;
+    offY -= f3;
+    offZ -= f3;
     f4 += f3;
     f5 += f3;
     f6 += f3;
 
     if (mirror) {
       final float f7 = f4;
-      f4 = f;
-      f = f7;
+      f4 = offX;
+      offX = f7;
     }
 
     PositionTextureVertex positiontexturevertex =
-        new PositionTextureVertex(f, f1, f2, 0.0F, 0.0F);
+        new PositionTextureVertex(offX, offY, offZ, 0.0F, 0.0F);
     PositionTextureVertex positiontexturevertex1 =
-        new PositionTextureVertex(f4, f1, f2, 0.0F, 8F);
+        new PositionTextureVertex(f4, offY, offZ, 0.0F, 8F);
     PositionTextureVertex positiontexturevertex2 =
-        new PositionTextureVertex(f4 + sagan, f5, f2 - sagan, 8F, 8F);
+        new PositionTextureVertex(f4 + sagan, f5, offZ - sagan, 8F, 8F);
     PositionTextureVertex positiontexturevertex3 =
-        new PositionTextureVertex(f - sagan, f5, f2 - sagan, 8F, 0.0F);
+        new PositionTextureVertex(offX - sagan, f5, offZ - sagan, 8F, 0.0F);
     PositionTextureVertex positiontexturevertex4 =
-        new PositionTextureVertex(f, f1, f6, 0.0F, 0.0F);
+        new PositionTextureVertex(offX, offY, f6, 0.0F, 0.0F);
     PositionTextureVertex positiontexturevertex5 =
-        new PositionTextureVertex(f4, f1, f6, 0.0F, 8F);
+        new PositionTextureVertex(f4, offY, f6, 0.0F, 8F);
     PositionTextureVertex positiontexturevertex6 =
         new PositionTextureVertex(f4 + sagan, f5, f6 + sagan, 8F, 8F);
     PositionTextureVertex positiontexturevertex7 =
-        new PositionTextureVertex(f - sagan, f5, f6 + sagan, 8F, 0.0F);
+        new PositionTextureVertex(offX - sagan, f5, f6 + sagan, 8F, 0.0F);
 
     if (carl == 2) {
-      sagan = (f + f4) / 2F;
-      final float robert = (f2 + f6) / 2F;
-      positiontexturevertex = new PositionTextureVertex(f, f1, f2, 0.0F, 0.0F);
-      positiontexturevertex1 = new PositionTextureVertex(f4, f1, f2, 0.0F, 8F);
+      sagan = (offX + f4) / 2F;
+      final float robert = (offZ + f6) / 2F;
+      positiontexturevertex = new PositionTextureVertex(offX, offY, offZ, 0.0F, 0.0F);
+      positiontexturevertex1 = new PositionTextureVertex(f4, offY, offZ, 0.0F, 8F);
       positiontexturevertex2 =
           new PositionTextureVertex(sagan, f5, robert, 8F, 8F);
       positiontexturevertex3 =
           new PositionTextureVertex(sagan, f5, robert, 8F, 0.0F);
-      positiontexturevertex4 = new PositionTextureVertex(f, f1, f6, 0.0F, 0.0F);
-      positiontexturevertex5 = new PositionTextureVertex(f4, f1, f6, 0.0F, 8F);
+      positiontexturevertex4 = new PositionTextureVertex(offX, offY, f6, 0.0F, 0.0F);
+      positiontexturevertex5 = new PositionTextureVertex(f4, offY, f6, 0.0F, 8F);
       positiontexturevertex6 =
           new PositionTextureVertex(sagan, f5, robert, 8F, 8F);
       positiontexturevertex7 =
@@ -116,39 +116,39 @@ public class FairyModelRenderer extends ModelRenderer {
         new PositionTextureVertex[] {
             positiontexturevertex5, positiontexturevertex1,
             positiontexturevertex2, positiontexturevertex6},
-        textureOffsetX + k + i, textureOffsetY + k, textureOffsetX + k + i + k,
-        textureOffsetY + k + j, field_35971_a, field_35970_b);
+        textureOffsetX + depth + width, textureOffsetY + depth, textureOffsetX + depth + width + depth,
+        textureOffsetY + depth + height, field_35971_a, field_35970_b);
     faces[1] = new TexturedQuad(
         new PositionTextureVertex[] {
             positiontexturevertex, positiontexturevertex4,
             positiontexturevertex7, positiontexturevertex3},
-        textureOffsetX + 0, textureOffsetY + k, textureOffsetX + k,
-        textureOffsetY + k + j, field_35971_a, field_35970_b);
+        textureOffsetX + 0, textureOffsetY + depth, textureOffsetX + depth,
+        textureOffsetY + depth + height, field_35971_a, field_35970_b);
     faces[2] = new TexturedQuad(
         new PositionTextureVertex[] {
             positiontexturevertex5, positiontexturevertex4,
             positiontexturevertex, positiontexturevertex1},
-        textureOffsetX + k, textureOffsetY + 0, textureOffsetX + k + i,
-        textureOffsetY + k, field_35971_a, field_35970_b);
+        textureOffsetX + depth, textureOffsetY + 0, textureOffsetX + depth + width,
+        textureOffsetY + depth, field_35971_a, field_35970_b);
     faces[3] = new TexturedQuad(
         new PositionTextureVertex[] {
             positiontexturevertex2, positiontexturevertex3,
             positiontexturevertex7, positiontexturevertex6},
-        textureOffsetX + k + i, textureOffsetY + 0, textureOffsetX + k + i + i,
-        textureOffsetY + k, field_35971_a, field_35970_b);
+        textureOffsetX + depth + width, textureOffsetY + 0, textureOffsetX + depth + width + width,
+        textureOffsetY + depth, field_35971_a, field_35970_b);
     faces[4] = new TexturedQuad(
         new PositionTextureVertex[] {
             positiontexturevertex1, positiontexturevertex,
             positiontexturevertex3, positiontexturevertex2},
-        textureOffsetX + k, textureOffsetY + k, textureOffsetX + k + i,
-        textureOffsetY + k + j, field_35971_a, field_35970_b);
+        textureOffsetX + depth, textureOffsetY + depth, textureOffsetX + depth + width,
+        textureOffsetY + depth + height, field_35971_a, field_35970_b);
     faces[5] =
         new TexturedQuad(new PositionTextureVertex[] {positiontexturevertex4,
                                                       positiontexturevertex5,
                                                       positiontexturevertex6,
                                                       positiontexturevertex7},
-                         textureOffsetX + k + i + k, textureOffsetY + k,
-                         textureOffsetX + k + i + k + i, textureOffsetY + k + j,
+                         textureOffsetX + depth + width + depth, textureOffsetY + depth,
+                         textureOffsetX + depth + width + depth + width, textureOffsetY + depth + height,
                          field_35971_a, field_35970_b);
 
     if (mirror) {
