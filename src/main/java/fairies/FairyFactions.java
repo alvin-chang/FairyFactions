@@ -35,8 +35,6 @@ public class FairyFactions {
 
 	public static final Logger		LOGGER	= LogManager.getFormatterLogger(Version.MOD_ID);
 
-	private Spawner					fairySpawner;
-
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		final File BaseDir = new File(event.getModConfigurationDirectory(), Version.MOD_ID);
@@ -54,9 +52,6 @@ public class FairyFactions {
 		FairyEventListener listener = new FairyEventListener();
 		MinecraftForge.EVENT_BUS.register(listener);
 
-		proxy.initEntities();
-		LOGGER.debug("Registered entities");
-
 		proxy.initChannel(listener);
 		LOGGER.debug("Registered channel");
 
@@ -73,17 +68,6 @@ public class FairyFactions {
 
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		fairySpawner = new Spawner();
-		// TODO: move these thresholds into config file
-		final int maxNum = 18;
-		final int freqNum = 8;
-		fairySpawner.setMaxAnimals(maxNum);
-		fairySpawner.AddCustomSpawn(EntityFairy.class, freqNum, EnumCreatureType.CREATURE);
-		FMLCommonHandler.instance().bus().register(fairySpawner);
-
-        // TODO: register entity localization
-		LOGGER.debug("Spawner is a modified version of CustomSpawner, created by DrZhark.");
-
 		proxy.postInit();
 	}
 

@@ -3,6 +3,8 @@ package fairies.entity;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import fairies.ai.EntityFairyFlyHelper;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
@@ -50,319 +52,309 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityFlappable extends EntityTameable {
-    private static final DataParameter<Integer> VARIANT = EntityDataManager.<Integer>createKey(EntityFlappable.class, DataSerializers.VARINT);
-    /** Used to select entities the parrot can mimic the sound of */
-    private static final Predicate<EntityLiving> CAN_MIMIC = new Predicate<EntityLiving>()
-    {
-        public boolean apply(@Nullable EntityLiving p_apply_1_)
-        {
-            return p_apply_1_ != null && EntityFlappable.MIMIC_SOUNDS.containsKey(p_apply_1_.getClass());
-        }
-    };
-    private static final Item DEADLY_ITEM = Items.COOKIE;
-    private static final Set<Item> TAME_ITEMS = Sets.newHashSet(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS);
-    private static final java.util.Map<Class<? extends Entity>, SoundEvent> MIMIC_SOUNDS = Maps.newHashMapWithExpectedSize(32);
-    public float flap;
-    public float flapSpeed;
-    public float oFlapSpeed;
-    public float oFlap;
-    public float flapping = 1.0F;
+	private static final DataParameter<Integer> VARIANT = EntityDataManager.<Integer>createKey(EntityFlappable.class,
+			DataSerializers.VARINT);
+	private static final Item DEADLY_ITEM = Items.COOKIE;
+	protected static final Set<Item> TAME_ITEMS = Sets.newHashSet(Items.SPECKLED_MELON, Items.APPLE, Items.MELON,
+			Items.SUGAR, Items.CAKE, Items.COOKIE);
+	protected static final Set<Item> VILE_ITEMS = Sets.newHashSet(Items.SLIME_BALL, Items.ROTTEN_FLESH,
+			Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE);
+	public static final int MAX_VARIANT = 3;
 
-    public EntityFlappable(World worldIn)
-    {
-        super(worldIn);
-        this.moveHelper = new EntityFlyHelper(this);
-    }
+	public float flapMaxEnergy = 200F;
+	public float flapDecay = 1.0F;
+	public int flapDelay = 15;
 
-    /**
-     * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
-     * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory.
-     *  
-     * The livingdata parameter is used to pass data between all instances during a pack spawn. It will be null on the
-     * first call. Subclasses may check if it's null, and then create a new one and return it if so, initializing all
-     * entities in the pack with the contained data.
-     *  
-     * @return The IEntityLivingData to pass to this method for other instances of this entity class within the same
-     * pack
-     *  
-     * @param difficulty The current local difficulty
-     * @param livingdata Shared spawn data. Will usually be null. (See return value for more information)
-     */
-    @Nullable
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
-    {
-        this.setVariant(this.rand.nextInt(5));
-        return super.onInitialSpawn(difficulty, livingdata);
-    }
+	public float flap;
+	public float flapSpeed;
+	public float oFlapSpeed;
+	public float oFlap;
+	public float flapEnergy;
+	public int delayFlap;
 
-  /*   protected void initEntityAI()
-    {
-        this.aiSit = new EntityAISit(this);
-        this.tasks.addTask(0, new EntityAIPanic(this, 1.25D));
-        this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(1, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(2, this.aiSit);
-        this.tasks.addTask(2, new EntityAIFollowOwnerFlying(this, 1.0D, 5.0F, 1.0F));
-        this.tasks.addTask(2, new EntityAIWanderAvoidWaterFlying(this, 1.0D));
-        this.tasks.addTask(3, new EntityAIFollow(this, 1.0D, 3.0F, 7.0F));
-    }
- */
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.FLYING_SPEED);
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(6.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.FLYING_SPEED).setBaseValue(0.4000000059604645D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
-    }
+	public float flapping = 1.0F;
 
-    /**
-     * Returns new PathNavigateGround instance
-     */
-    protected PathNavigate createNavigator(World worldIn)
-    {
-        PathNavigateFlying pathnavigateflying = new PathNavigateFlying(this, worldIn);
-        pathnavigateflying.setCanOpenDoors(false);
-        pathnavigateflying.setCanFloat(true);
-        pathnavigateflying.setCanEnterDoors(true);
-        return pathnavigateflying;
-    }
+	public EntityFlappable(World worldIn) {
+		super(worldIn);
+		this.moveHelper = new EntityFairyFlyHelper(this);
+	}
 
-    public float getEyeHeight()
-    {
-        return this.height * 0.6F;
-    }
+	/**
+	 * Called only once on an entity when first time spawned, via egg, mob spawner,
+	 * natural spawning etc, but not called when entity is reloaded from nbt. Mainly
+	 * used for initializing attributes and inventory.
+	 * 
+	 * The livingdata parameter is used to pass data between all instances during a
+	 * pack spawn. It will be null on the first call. Subclasses may check if it's
+	 * null, and then create a new one and return it if so, initializing all
+	 * entities in the pack with the contained data.
+	 * 
+	 * @return The IEntityLivingData to pass to this method for other instances of
+	 *         this entity class within the same pack
+	 * 
+	 * @param difficulty The current local difficulty
+	 * @param livingdata Shared spawn data. Will usually be null. (See return value
+	 *                   for more information)
+	 */
+	@Nullable
+	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+		this.setVariant(this.rand.nextInt(4));
+		this.flapEnergy = this.flapMaxEnergy;
+		return super.onInitialSpawn(difficulty, livingdata);
+	}
 
-    /**
-     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
-     * use this to react to sunlight and start to burn.
-     */
-    public void onLivingUpdate()
-    {
-        super.onLivingUpdate();
-        this.calculateFlapping();
-    }
+	/*
+	 * protected void initEntityAI() { this.aiSit = new EntityAISit(this);
+	 * this.tasks.addTask(0, new EntityAIPanic(this, 1.25D)); this.tasks.addTask(0,
+	 * new EntityAISwimming(this)); this.tasks.addTask(1, new
+	 * EntityAIWatchClosest(this, EntityPlayer.class, 8.0F)); this.tasks.addTask(2,
+	 * this.aiSit); this.tasks.addTask(2, new EntityAIFollowOwnerFlying(this, 1.0D,
+	 * 5.0F, 1.0F)); this.tasks.addTask(2, new EntityAIWanderAvoidWaterFlying(this,
+	 * 1.0D)); this.tasks.addTask(3, new EntityAIFollow(this, 1.0D, 3.0F, 7.0F)); }
+	 */
+	protected void applyEntityAttributes() {
+		super.applyEntityAttributes();
+		this.getAttributeMap().registerAttribute(SharedMonsterAttributes.FLYING_SPEED);
+		this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(6.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.FLYING_SPEED).setBaseValue(0.4000000059604645D);
+		this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
+	}
 
-    private void calculateFlapping()
-    {
-        this.oFlap = this.flap;
-        this.oFlapSpeed = this.flapSpeed;
-        this.flapSpeed = (float)((double)this.flapSpeed + (double)(this.onGround ? -1 : 4) * 0.3D);
-        this.flapSpeed = MathHelper.clamp(this.flapSpeed, 0.0F, 1.0F);
+	/**
+	 * Returns new PathNavigateGround instance
+	 */
+	protected PathNavigate createNavigator(World worldIn) {
+		PathNavigateFlying pathnavigateflying = new PathNavigateFlying(this, worldIn);
+		pathnavigateflying.setCanOpenDoors(false);
+		pathnavigateflying.setCanFloat(true);
+		pathnavigateflying.setCanEnterDoors(true);
+		return pathnavigateflying;
+	}
 
-        if (!this.onGround && this.flapping < 1.0F)
-        {
-            this.flapping = 1.0F;
-        }
+	/**
+	 * Called frequently so the entity can update its state every tick as required.
+	 * For example, zombies and skeletons use this to react to sunlight and start to
+	 * burn.
+	 */
+	public void onLivingUpdate() {
+		super.onLivingUpdate();
+		this.calculateFlapping();
+		this.calculateFlyOrWalk();
+	}
 
-        this.flapping = (float)((double)this.flapping * 0.9D);
+	public boolean canFlap() {
+		if (this.flapDecay > 0) {
+			if (this.flapEnergy <= 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-        if (!this.onGround && this.motionY < 0.0D)
-        {
-            this.motionY *= 0.6D;
-        }
+	private void calculateFlyOrWalk() {
 
-        this.flap += this.flapping * 2.0F;
-    }
+		if (!this.isFlying()) {
+			if (rand.nextInt(50) == 0) {
+				this.jump();
+			}
+		}
 
-    public boolean processInteract(EntityPlayer player, EnumHand hand)
-    {
-        ItemStack itemstack = player.getHeldItem(hand);
+	}
 
-        if (!this.isTamed() && TAME_ITEMS.contains(itemstack.getItem()))
-        {
-            if (!player.capabilities.isCreativeMode)
-            {
-                itemstack.shrink(1);
-            }
+	private void calculateFlapping() {
+		if (canFlap() && this.delayFlap == 0) {
+			this.oFlap = this.flap;
+			this.oFlapSpeed = this.flapSpeed;
+			this.flapSpeed = (float) ((double) this.flapSpeed + (double) (this.onGround ? -1 : 4) * 0.3D);
+			this.flapSpeed = MathHelper.clamp(this.flapSpeed, 0.0F, 1.0F);
+			if (this.flapDecay > 0) {
+				this.flapEnergy = MathHelper.clamp(this.flapEnergy - this.flapSpeed, 0, this.flapMaxEnergy);
 
-            if (!this.isSilent())
-            {
-                this.world.playSound((EntityPlayer)null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PARROT_EAT, this.getSoundCategory(), 1.0F, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
-            }
+			}
+			if (!this.onGround && this.flapping < 1.0F) {
+				this.flapping = 1.0F;
+			}
 
-            if (!this.world.isRemote)
-            {
-                if (this.rand.nextInt(10) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player))
-                {
-                    this.setTamedBy(player);
-                    this.playTameEffect(true);
-                    this.world.setEntityState(this, (byte)7);
-                }
-                else
-                {
-                    this.playTameEffect(false);
-                    this.world.setEntityState(this, (byte)6);
-                }
-            }
+			this.flapping = (float) ((double) this.flapping * 0.9D);
 
-            return true;
-        }
-        else if (itemstack.getItem() == DEADLY_ITEM)
-        {
-            if (!player.capabilities.isCreativeMode)
-            {
-                itemstack.shrink(1);
-            }
+			if (!this.onGround && this.motionY < 0.0D) {
+		//		this.motionY += this.flapSpeed;
+			}
 
-            this.addPotionEffect(new PotionEffect(MobEffects.POISON, 900));
+			this.flap += this.flapping * 2.0F;
+			this.delayFlap = MathHelper.clamp(this.delayFlap--, 0, this.flapDelay);
+		}
+		// regen flap health
+		if ((!this.isFlying() || !this.canFlap()) && this.flapEnergy < this.flapMaxEnergy) {
+			this.flapEnergy = MathHelper.clamp(this.flapEnergy + this.flapDecay, 0, this.flapMaxEnergy);
+		}
+	}
 
-            if (player.isCreative() || !this.getIsInvulnerable())
-            {
-                this.attackEntityFrom(DamageSource.causePlayerDamage(player), Float.MAX_VALUE);
-            }
+	public boolean processInteract(EntityPlayer player, EnumHand hand) {
+		ItemStack itemstack = player.getHeldItem(hand);
 
-            return true;
-        }
-        else
-        {
-            if (!this.world.isRemote && !this.isFlying() && this.isTamed() && this.isOwner(player))
-            {
-                this.aiSit.setSitting(!this.isSitting());
-            }
+		if (!this.isTamed() && TAME_ITEMS.contains(itemstack.getItem())) {
+			if (!player.capabilities.isCreativeMode) {
+				itemstack.shrink(1);
+			}
 
-            return super.processInteract(player, hand);
-        }
-    }
+			if (!this.isSilent()) {
+				this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ,
+						SoundEvents.ENTITY_PARROT_EAT, this.getSoundCategory(), 1.0F,
+						1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
+			}
 
-    /**
-     * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
-     * the animal type)
-     */
-    public boolean isBreedingItem(ItemStack stack)
-    {
-        return false;
-    }
+			if (!this.world.isRemote) {
+				if (this.rand.nextInt(10) == 0
+						&& !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+					this.setTamedBy(player);
+					this.playTameEffect(true);
+					this.world.setEntityState(this, (byte) 7);
+				} else {
+					this.playTameEffect(false);
+					this.world.setEntityState(this, (byte) 6);
+				}
+			}
 
-    /**
-     * Checks if the entity's current position is a valid location to spawn this entity.
-     */
-    public boolean getCanSpawnHere()
-    {
-        int i = MathHelper.floor(this.posX);
-        int j = MathHelper.floor(this.getEntityBoundingBox().minY);
-        int k = MathHelper.floor(this.posZ);
-        BlockPos blockpos = new BlockPos(i, j, k);
-        Block block = this.world.getBlockState(blockpos.down()).getBlock();
-        return block instanceof BlockLeaves || block == Blocks.GRASS || block instanceof BlockLog || block == Blocks.AIR && this.world.getLight(blockpos) > 8 && super.getCanSpawnHere();
-    }
+			return true;
+		} else if (itemstack.getItem() == DEADLY_ITEM) {
+			if (!player.capabilities.isCreativeMode) {
+				itemstack.shrink(1);
+			}
 
-    public void fall(float distance, float damageMultiplier)
-    {
-    }
+			this.addPotionEffect(new PotionEffect(MobEffects.POISON, 900));
 
-    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos)
-    {
-    }
+			if (player.isCreative() || !this.getIsInvulnerable()) {
+				this.attackEntityFrom(DamageSource.causePlayerDamage(player), Float.MAX_VALUE);
+			}
 
-    /**
-     * Returns true if the mob is currently able to mate with the specified mob.
-     */
-    public boolean canMateWith(EntityAnimal otherAnimal)
-    {
-        return false;
-    }
+			return true;
+		} else {
+			if (!this.world.isRemote && !this.isFlying() && this.isTamed() && this.isOwner(player)) {
+				this.aiSit.setSitting(!this.isSitting());
+			}
 
-    @Nullable
-    public EntityAgeable createChild(EntityAgeable ageable)
-    {
-        return null;
-    }
+			return super.processInteract(player, hand);
+		}
+	}
 
-    public boolean attackEntityAsMob(Entity entityIn)
-    {
-        return entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
-    }
+	/**
+	 * Checks if the parameter is an item which this animal can be fed to breed it
+	 * (wheat, carrots or seeds depending on the animal type)
+	 */
+	public boolean isBreedingItem(ItemStack stack) {
+		return false;
+	}
 
-    protected float playFlySound(float p_191954_1_)
-    {
-        this.playSound(SoundEvents.ENTITY_PARROT_FLY, 0.15F, 1.0F);
-        return p_191954_1_ + this.flapSpeed / 2.0F;
-    }
+	/**
+	 * Checks if the entity's current position is a valid location to spawn this
+	 * entity.
+	 */
+	public boolean getCanSpawnHere() {
+		int i = MathHelper.floor(this.posX);
+		int j = MathHelper.floor(this.getEntityBoundingBox().minY);
+		int k = MathHelper.floor(this.posZ);
+		BlockPos blockpos = new BlockPos(i, j, k);
+		Block block = this.world.getBlockState(blockpos.down()).getBlock();
+		return block instanceof BlockLeaves || block == Blocks.GRASS || block instanceof BlockLog
+				|| block == Blocks.AIR && this.world.getLight(blockpos) > 8 && super.getCanSpawnHere();
+	}
 
-    protected boolean makeFlySound()
-    {
-        return true;
-    }
+	public void fall(float distance, float damageMultiplier) {
+	}
 
-    /**
-     * Returns true if this entity should push and be pushed by other entities when colliding.
-     */
-    public boolean canBePushed()
-    {
-        return true;
-    }
+	protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
+	}
 
-    protected void collideWithEntity(Entity entityIn)
-    {
-        if (!(entityIn instanceof EntityPlayer))
-        {
-            super.collideWithEntity(entityIn);
-        }
-    }
+	/**
+	 * Returns true if the mob is currently able to mate with the specified mob.
+	 */
+	public boolean canMateWith(EntityAnimal otherAnimal) {
+		return false;
+	}
 
-    /**
-     * Called when the entity is attacked.
-     */
-    public boolean attackEntityFrom(DamageSource source, float amount)
-    {
-        if (this.isEntityInvulnerable(source))
-        {
-            return false;
-        }
-        else
-        {
-            if (this.aiSit != null)
-            {
-                this.aiSit.setSitting(false);
-            }
+	@Nullable
+	public EntityAgeable createChild(EntityAgeable ageable) {
+		return null;
+	}
 
-            return super.attackEntityFrom(source, amount);
-        }
-    }
+	public boolean attackEntityAsMob(Entity entityIn) {
+		return entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), 3.0F);
+	}
 
-    public int getVariant()
-    {
-        return MathHelper.clamp(((Integer)this.dataManager.get(VARIANT)).intValue(), 0, 4);
-    }
+	protected float playFlySound(float p_191954_1_) {
+		this.playSound(SoundEvents.ENTITY_PARROT_FLY, 0.15F, 1.0F);
+		return p_191954_1_ + this.flapSpeed / 2.0F;
+	}
 
-    public void setVariant(int variantIn)
-    {
-        this.dataManager.set(VARIANT, Integer.valueOf(variantIn));
-    }
+	protected boolean makeFlySound() {
+		return true;
+	}
 
-    protected void entityInit()
-    {
-        super.entityInit();
-        this.dataManager.register(VARIANT, Integer.valueOf(0));
-    }
+	/**
+	 * Returns true if this entity should push and be pushed by other entities when
+	 * colliding.
+	 */
+	public boolean canBePushed() {
+		return true;
+	}
 
-    /**
-     * (abstract) Protected helper method to write subclass entity data to NBT.
-     */
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("Variant", this.getVariant());
-    }
+	protected void collideWithEntity(Entity entityIn) {
+		if (!(entityIn instanceof EntityPlayer)) {
+			super.collideWithEntity(entityIn);
+		}
+	}
 
-    /**
-     * (abstract) Protected helper method to read subclass entity data from NBT.
-     */
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
-        super.readEntityFromNBT(compound);
-        this.setVariant(compound.getInteger("Variant"));
-    }
+	/**
+	 * Called when the entity is attacked.
+	 */
+	public boolean attackEntityFrom(DamageSource source, float amount) {
+		if (this.isEntityInvulnerable(source)) {
+			return false;
+		} else {
+			if (this.aiSit != null) {
+				this.aiSit.setSitting(false);
+			}
 
-    @Nullable
-    protected ResourceLocation getLootTable()
-    {
-        return LootTableList.ENTITIES_PARROT;
-    }
+			return super.attackEntityFrom(source, amount);
+		}
+	}
 
-    public boolean isFlying()
-    {
-        return !this.onGround;
-    }
+	public int getVariant() {
+		return MathHelper.clamp(((Integer) this.dataManager.get(VARIANT)).intValue(), 0, 4);
+	}
+
+	public void setVariant(int variantIn) {
+		this.dataManager.set(VARIANT, Integer.valueOf(variantIn));
+	}
+
+	protected void entityInit() {
+		super.entityInit();
+		this.dataManager.register(VARIANT, Integer.valueOf(0));
+	}
+
+	/**
+	 * (abstract) Protected helper method to write subclass entity data to NBT.
+	 */
+	public void writeEntityToNBT(NBTTagCompound compound) {
+		super.writeEntityToNBT(compound);
+		compound.setInteger("Variant", this.getVariant());
+	}
+
+	/**
+	 * (abstract) Protected helper method to read subclass entity data from NBT.
+	 */
+	public void readEntityFromNBT(NBTTagCompound compound) {
+		super.readEntityFromNBT(compound);
+		this.setVariant(compound.getInteger("Variant"));
+	}
+
+	@Nullable
+	protected ResourceLocation getLootTable() {
+		return LootTableList.ENTITIES_PARROT;
+	}
+
+	public boolean isFlying() {
+		return !this.onGround;
+	}
 }

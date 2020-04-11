@@ -1,32 +1,23 @@
 package fairies.proxy;
 
-import fairies.FairyFactions;
 import fairies.Version;
 import fairies.entity.EntityFairy;
 import fairies.entity.FairyEntityFishHook;
 import fairies.event.FairyEventListener;
 import fairies.event.PacketSetFairyName;
 import java.util.List;
-import java.util.logging.Logger;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Biomes;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketEntityAttach;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 public class CommonProxy {
 
@@ -41,34 +32,6 @@ public class CommonProxy {
   public void initChannel(FairyEventListener listener) {
     this.eventListener = listener;
     this.eventChannel.register(this.eventListener);
-  }
-
-  public void initEntities() {
-    int entityID = 0;
-    registerEntity(entityID++, EntityFairy.class, "Fairy", 0xea8fde, 0x8658bf);
-    registerEntity(entityID++, FairyEntityFishHook.class, "FairyFishhook");
-  }
-
-  private void registerEntity(int entityID, Class<? extends Entity> entityClass,
-                              String entityName) {
-
-    EntityRegistry.registerModEntity(
-        new ResourceLocation(Version.MOD_ID + ":" + entityName), entityClass,
-        entityName, entityID, FairyFactions.INSTANCE, 64, 4, true);
-  }
-
-  private void registerEntity(int entityID,
-                              Class<? extends EntityLiving> entityClass,
-                              String entityName, int backgroundEggColor,
-                              int foregroundEggColor) {
-
-    EntityRegistry.registerModEntity(
-        new ResourceLocation(Version.MOD_ID + ":" + entityName), entityClass,
-        entityName, entityID, FairyFactions.INSTANCE, 64, 4, true,
-        backgroundEggColor, foregroundEggColor);
-    // EntityRegistry.addSpawn(entityClass, 100, 3, 5,
-    // EnumCreatureType.CREATURE, Biomes.BIRCH_FOREST_HILLS,
-    // Biomes.BIRCH_FOREST, Biomes.PLAINS);
   }
 
   public void initGUI() {
