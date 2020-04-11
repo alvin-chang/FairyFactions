@@ -30,7 +30,7 @@ public class LayerFairyRogue implements LayerRenderer<EntityFairy> {
 	public void doRenderLayer(EntityFairy entitylivingbaseIn, float limbSwing, float limbSwingAmount,
 			float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
 		// TODO Auto-generated method stub
-		if (entitylivingbaseIn.rogue()) {
+		if (!entitylivingbaseIn.queen() && !entitylivingbaseIn.normal() && entitylivingbaseIn.rogue()) {
 			GlStateManager.pushMatrix();
 			GlStateManager.rotate(180, 0, 0, 1);
 			GlStateManager.scale(0.6, 0.6, 0.6);
@@ -40,9 +40,13 @@ public class LayerFairyRogue implements LayerRenderer<EntityFairy> {
 					ItemCameraTransforms.TransformType.FIXED);
 			GlStateManager.popMatrix();
 			this.renderer.bindTexture(RenderFairy.getRes("fairy_props2"));
-			this.model.sinage = entitylivingbaseIn.sinage;
+			
+			
 			this.model.flymode = entitylivingbaseIn.flymode();
+			this.model.retract = 0F;
 			this.model.isSneak = entitylivingbaseIn.isSneaking();
+			this.model.sinage = entitylivingbaseIn.sinage;
+			this.model.venom = entitylivingbaseIn.canHeal();
 			this.model.setModelAttributes(this.renderer.getMainModel());
 			this.model.render(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
 		}

@@ -292,7 +292,6 @@ public class ModelFairy extends ModelBiped {
 
 	@Override
 	public void postRenderArm(float scale, EnumHandSide side) {
-		FairyFactions.LOGGER.debug("drawing arm overlay");
 		ModelRenderer modelrenderer = this.getArmForSide(side);
 		float f = 0.5F * (float) (side == EnumHandSide.RIGHT ? 1 : -1);
 		// TODO: fix this properly
